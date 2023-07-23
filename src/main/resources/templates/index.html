@@ -1,0 +1,157 @@
+<html>
+<head>
+    <title>Chat WebSocket</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.js"
+            integrity="sha512-lyIq9fRcCeSCXhp41XC/250UBmypAHV8KW+AhLcSEIksWHBfhzub6XXwDe67wTpOG8zrO2NAU/TYmEaCW+aQSg=="
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"
+            integrity="sha512-iKDtgDyTHjAitUDdLljGhenhPwrbBfqTKWO1mkhSFH3A7blITC9MhYon6SjnMhp4o0rADGw9yAC6EW4t5a4K3g=="
+            crossorigin="anonymous"></script>
+    <style type="text/css">
+        .online {
+            color: green;
+        }
+
+        .offline {
+            color: gray;
+        }
+    </style>
+
+    <script type="text/javascript">
+        var stompClient = null;
+        var id = null;
+
+        function setConnected(connected) {
+            document.getElementById('connect').disabled = connected;
+            document.getElementById('disconnect').disabled = !connected;
+            document.getElementById('conversationDiv').style.visibility = connected ? 'visible' : 'hidden';
+            document.getElementById('response').innerHTML = '';
+        }
+
+        function connect() {
+            var socket = new SockJS('http://localhost:8081/ws');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function (frame) {
+                setConnected(true);
+
+                // id = Math.floor(Math.random() * 100000);
+                id = document.getElementById('from').value;
+                console.log(`Connected: ${frame} with user id ${id}`);
+                stompClient.subscribe('/topic/location-history', function (messageOutput) {
+                    showMessageOutput(JSON.parse(messageOutput.body));
+                });
+
+                stompClient.subscribe('/topic/online-friends/' + id, message => {
+                    console.log('/topic/online-friends/' + id, message);
+                    showFriend(JSON.parse(message.body));
+                });
+
+                initLocation();
+
+                setInterval(() => {
+                    sendLocation();
+                }, 5000);
+            });
+        }
+
+        function initLocation() {
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("POST", "/location/init", false); // false for synchronous request
+            xmlHttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+            xmlHttp.send(JSON.stringify({userId: id}));
+        }
+
+        function disconnect() {
+            if (stompClient != null) {
+                stompClient.disconnect();
+            }
+            setConnected(false);
+            console.log("Disconnected");
+        }
+
+        function sendMessage() {
+            var from = document.getElementById('from').value;
+            var text = document.getElementById('text').value;
+            stompClient.send("/app/location/" + id, {},
+                JSON.stringify({'userId': id, 'from': from, 'text': text}));
+        }
+
+        function sendLocation() {
+            let data = {
+                'userId': id,
+                'longitude': Math.floor(Math.random() * 10000),
+                'latitude': Math.floor(Math.random() * 10000)
+            };
+            document.getElementById('me').textContent = `${data.userId} (${data.longitude}, ${data.latitude})`
+            stompClient.send("/app/location/" + id, {}, JSON.stringify(data));
+        }
+
+        function showMessageOutput(messageOutput) {
+            var response = document.getElementById('response');
+            var p = document.createElement('p');
+            p.style.wordWrap = 'break-word';
+            p.appendChild(document.createTextNode(`${messageOutput.time} - ${messageOutput.from}: ${messageOutput.text}`));
+            response.prepend(p);
+        }
+
+        function showFriend(friend) {
+            var friendEl = document.getElementById(friend.userId);
+            if (friendEl) {
+                friendEl.textContent = `${friend.userId} (${friend.longitude}, ${friend.latitude})`;
+                if (friend.offline) {
+                    friendEl.classList.add("offline");
+                    friendEl.classList.remove("online");
+                } else {
+                    friendEl.classList.add("online");
+                    friendEl.classList.remove("offline");
+                }
+                return;
+            }
+
+            var response = document.getElementById('friends');
+            var p = document.createElement('p');
+            p.setAttribute("id", friend.userId);
+            p.appendChild(document.createTextNode(`${friend.userId} (${friend.longitude}, ${friend.latitude})`));
+            response.appendChild(p);
+        }
+    </script>
+</head>
+<body onload="disconnect()">
+<div>
+    <div>
+        <input type="text" id="from" placeholder="Choose a nickname"/>
+    </div>
+    <br/>
+    <div>
+        <button id="connect" onclick="connect();">Connect</button>
+        <button id="disconnect" disabled="disabled" onclick="disconnect();">
+            Disconnect
+        </button>
+    </div>
+    <br/>
+    <div id="conversationDiv">
+        <input type="text" id="text" placeholder="Write a message..."/>
+        <button id="sendMessage" onclick="sendMessage();">Send</button>
+        <div>
+            <h2>Me</h2>
+            <div>
+                <p id="me"></p>
+            </div>
+        </div>
+        <div>
+            <h2>Near by</h2>
+            <div>
+                <p id="friends"></p>
+            </div>
+        </div>
+        <div>
+            <h2>History</h2>
+            <div>
+                <p id="response"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
