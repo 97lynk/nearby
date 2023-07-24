@@ -21,5 +21,5 @@ public class Location implements Serializable {
 
     private double latitude;
 
-    private boolean offline;
+    private boolean nearby;
 }

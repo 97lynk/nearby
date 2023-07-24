@@ -25,8 +25,7 @@ public class LocationController {
 
     @PostMapping("/location/init")
     public void initLocation(@RequestBody Location location) {
-        log.info("initLocation {}", location.getUserId());
-        locationService.initSubscriber(location.getUserId());
+        locationService.initSubscriber(location);
     }
 
     // Handles messages from /app/chat. (Note the Spring adds the /app prefix for us).

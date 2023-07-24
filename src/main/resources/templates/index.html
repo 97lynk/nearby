@@ -8,11 +8,11 @@
             integrity="sha512-iKDtgDyTHjAitUDdLljGhenhPwrbBfqTKWO1mkhSFH3A7blITC9MhYon6SjnMhp4o0rADGw9yAC6EW4t5a4K3g=="
             crossorigin="anonymous"></script>
     <style type="text/css">
-        .online {
+        .nearby {
             color: green;
         }
 
-        .offline {
+        .not-nearby {
             color: gray;
         }
     </style>
@@ -41,9 +41,14 @@
                     showMessageOutput(JSON.parse(messageOutput.body));
                 });
 
-                stompClient.subscribe('/topic/online-friends/' + id, message => {
-                    console.log('/topic/online-friends/' + id, message);
-                    showFriend(JSON.parse(message.body));
+                stompClient.subscribe('/topic/nearby-friends/' + id, message => {
+                    console.log('/topic/nearby-friends/' + id, message);
+                    let friends = JSON.parse(message.body);
+                    if (Array.isArray(friends)) {
+                        friends.forEach(f => showFriend(f));
+                    } else {
+                        showFriend(friends);
+                    }
                 });
 
                 initLocation();
@@ -58,7 +63,11 @@
             var xmlHttp = new XMLHttpRequest();
             xmlHttp.open("POST", "/location/init", false); // false for synchronous request
             xmlHttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-            xmlHttp.send(JSON.stringify({userId: id}));
+            xmlHttp.send(JSON.stringify({
+                userId: id,
+                longitude: Math.floor(Math.random() * 10000),
+                latitude: Math.floor(Math.random() * 10000)
+            }));
         }
 
         function disconnect() {
@@ -78,9 +87,9 @@
 
         function sendLocation() {
             let data = {
-                'userId': id,
-                'longitude': Math.floor(Math.random() * 10000),
-                'latitude': Math.floor(Math.random() * 10000)
+                userId: id,
+                longitude: Math.floor(Math.random() * 10000),
+                latitude: Math.floor(Math.random() * 10000)
             };
             document.getElementById('me').textContent = `${data.userId} (${data.longitude}, ${data.latitude})`
             stompClient.send("/app/location/" + id, {}, JSON.stringify(data));
@@ -98,12 +107,12 @@
             var friendEl = document.getElementById(friend.userId);
             if (friendEl) {
                 friendEl.textContent = `${friend.userId} (${friend.longitude}, ${friend.latitude})`;
-                if (friend.offline) {
-                    friendEl.classList.add("offline");
-                    friendEl.classList.remove("online");
+                if (friend.nearby) {
+                    friendEl.classList.add("nearby");
+                    friendEl.classList.remove("not-nearby");
                 } else {
-                    friendEl.classList.add("online");
-                    friendEl.classList.remove("offline");
+                    friendEl.classList.add("not-nearby");
+                    friendEl.classList.remove("nearby");
                 }
                 return;
             }
