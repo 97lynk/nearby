@@ -93,10 +93,9 @@ public class LocationService {
     }
 
     private boolean isNearby(Location from, Location to) {
-//        double diffLong = Math.abs(from.getLongitude() - to.getLongitude());
-//        double diffLat = Math.abs(from.getLatitude() - to.getLatitude());
-//        return diffLong < 1000 || diffLat < 1000;
-        return true;
+        double diffLong = Math.abs(from.getLongitude() - to.getLongitude());
+        double diffLat = Math.abs(from.getLatitude() - to.getLatitude());
+        return diffLong < 1000 || diffLat < 1000;
     }
 
     private Optional<Location> getLocationFromCache(String userId) {

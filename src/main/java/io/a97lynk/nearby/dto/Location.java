@@ -22,4 +22,13 @@ public class Location implements Serializable {
     private double latitude;
 
     private boolean nearby;
+
+    @Override
+    public String toString() {
+        return "Location{" +
+                "userId='" + userId + '\'' +
+                ", longitude=" + longitude +
+                ", latitude=" + latitude +
+                '}';
+    }
 }
