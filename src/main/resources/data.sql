@@ -4,7 +4,7 @@ values ('tuan', 'Nguyen Tuan', 10),
        ('tony', 'Tony Nguyen', 11)
 ;
 
-insert into relationship(account_id, friend_id, type, start_time)
+insert into friendship(account_id, friend_id, type, start_time)
 values ('tuan', 'duyen', 'love', now()),
        ('tuan', 'tony', 'friend', now()),
        ('tony', 'tuan', 'friend', now()),

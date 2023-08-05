@@ -1,21 +1,22 @@
-package io.a97lynk.nearby.dto;
+package io.a97lynk.nearby.dto.cache;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.Setter;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.Date;
 
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
 @Builder
-public class Location implements Serializable {
-
-    private static final long serialVersionUID = -7264709203117701718L;
+@Getter
+@Setter
+public class LocationCacheDto implements Serializable {
 
     private String userId;
 
@@ -23,7 +24,5 @@ public class Location implements Serializable {
 
     private double latitude;
 
-    private String source;
-
-    private boolean nearby;
+    private Date updatedDate;
 }

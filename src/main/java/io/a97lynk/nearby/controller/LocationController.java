@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -24,7 +25,7 @@ public class LocationController {
     private final LocationService locationService;
 
     @PostMapping("/location/init")
-    public void initLocation(@RequestBody Location location) {
+    public void initLocation(@RequestBody Location location) throws UnknownHostException {
         locationService.initSubscriber(location);
     }
 
@@ -33,12 +34,11 @@ public class LocationController {
     // Sends the return value of this method to /topic/messages
     @SendTo("/topic/location-history")
     public Message send(@DestinationVariable String userId, @Payload Location location) throws Exception {
-        log.info("receive {}", location);
         String time = new SimpleDateFormat("HH:mm:ss").format(new Date());
 
         Message returnMessage = new Message(userId, userId, location.toString(), time);
 
-        locationService.updateLocation(location, location.getUserId());
+        locationService.periodicallyUpdateLocation(location, location.getUserId());
         return returnMessage;
     }
 }

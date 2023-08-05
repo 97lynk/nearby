@@ -1,5 +1,6 @@
 package io.a97lynk.nearby.pubsub;
 
+import io.a97lynk.nearby.dto.Location;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -16,7 +17,7 @@ public class RedisMessagePublisher implements MessagePublisher {
 
     @Override
     public void publish(Object message, String topic) {
-        log.info("Message sent: {} to {}", message, topic);
+        log.info("[{}] WS >> Message sent: {} to {}", ((Location) message).getUserId(), message, topic);
         redisTemplate.convertAndSend(topic, message);
     }
 }

@@ -29,7 +29,8 @@
         }
 
         function connect() {
-            var socket = new SockJS('http://localhost:8081/ws');
+
+            var socket = new SockJS(`http://${location.host}/ws`);
             stompClient = Stomp.over(socket);
             stompClient.connect({}, function (frame) {
                 setConnected(true);
@@ -49,6 +50,11 @@
                     } else {
                         showFriend(friends);
                     }
+                });
+
+                stompClient.subscribe('/topic/me/' + id, message => {
+                    console.log('/topic/me/' + id, message);
+                    document.getElementById('server').innerText = JSON.parse(message.body).serverHandle;
                 });
 
                 initLocation();
@@ -144,7 +150,9 @@
         <div>
             <h2>Me</h2>
             <div>
-                <p id="me"></p>
+                <p>
+                    <span id="me"></span> <span id="server"></span>
+                </p>
             </div>
         </div>
         <div>

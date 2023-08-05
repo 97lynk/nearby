@@ -31,7 +31,7 @@ public class RedisMessageSubscriber implements MessageListener {
     @Override
     public void onMessage(Message message, byte[] pattern) {
         String friendId = new String(message.getChannel()).split("_")[1];
-        log.info("{} Message received: {} {}", userId, message, friendId);
-        locationService.handleUpdateLocation(userId, ObjectUtil.jsonToObject(new String(message.getBody()), Location.class));
+        log.info("[{}] RedisPubSub << Message received: {} {} {}", userId, userId, message, friendId);
+        locationService.handleFriendUpdateLocation(userId, ObjectUtil.jsonToObject(new String(message.getBody()), Location.class));
     }
 }
