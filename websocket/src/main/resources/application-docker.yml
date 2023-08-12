@@ -1,0 +1,25 @@
+server:
+  port: 8081
+  name: ${SERVER_NAME:app}
+  servlet:
+    context-path: /ws
+spring:
+  datasource:
+    url: jdbc:h2:mem:mydb
+    username: sa
+    driverClassName: org.h2.Driver
+  jpa:
+    spring.jpa.database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    defer-datasource-initialization: true
+  sql:
+    init:
+      mode: always
+  h2:
+    console:
+      enabled: true
+  redis:
+    host: redis
+
+
